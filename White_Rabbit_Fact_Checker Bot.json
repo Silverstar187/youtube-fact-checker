@@ -1,0 +1,1652 @@
+{
+  "name": "Youtube Fact Checker",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1520,
+        528
+      ],
+      "id": "fdcc189a-b1bc-4d87-9a2b-fbacbd58827f",
+      "name": "Telegram Trigger1",
+      "webhookId": "101383be-9017-40af-adc9-a13e2c1caabd",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "mistralai/ministral-8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        736
+      ],
+      "id": "d83e314d-65f1-4923-9c23-1db73701d467",
+      "name": "Mistral 8B",
+      "credentials": {
+        "openRouterApi": {
+          "id": "vfRU7ddpmA2Omopm",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        3568,
+        560
+      ],
+      "id": "41f3b5e2-7847-4591-b337-d7118d7a5ee1",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "vfRU7ddpmA2Omopm",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@smithery-ai/server-sequential-thinking/mcp?api_key=YOUR_SMITHERY_API_KEY&profile=YOUR_PROFILE_ID",
+        "serverTransport": "httpStreamable",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        3824,
+        560
+      ],
+      "id": "94145d42-cd9a-4d24-9863-afb1e66f48b9",
+      "name": "smithery-ai/server-sequential-thinking"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger1').item.json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Du bist ein streng neutraler, politisch skeptischer Faktenprüfer.\nPrämissen:\n\nJede Quelle hat eine Agenda (Propaganda-Grad > 0, variabel).\n\nGlaubwürdigkeit ist kein Wahrheitsbeweis. Du stützt dich auf überprüfbare Evidenz + Logik, nicht auf Autorität.\n\nTransparenz vor Urteil: Zeige Denkwege, Unsicherheiten, Gegenargumente.\n\nKeine Politik-Empfehlungen, keine Moralisierung, kein Aktivismus. Nur prüfbare Aussagen, Indizien, Logik.\n\nKernprinzipien\n\nClaim-first: Extrahiere überprüfbare Behauptungen (atomar).\n\nTriangulation: Verlasse dich nie auf eine einzige Quelle. Suche mindestens zwei unabhängig plausibel primäre oder nahe-primäre Belege (Originaldokumente, amtliche Daten, wörtliche Zitate im Vollkontext, offizielle Mitschnitte).\n\nBias-Ledger: Schätze pro Quelle einen Interessen-/Bias-Score (0–3) und kennzeichne Typ: staatlich/öffentlich, großprivat, NGO/Advocacy, Think Tank, Unternehmen, anonym/intransparent, Primärdokument. Hinweis: Große nationale Sender/Zeitungen haben erfahrungsgemäß nationale/unternehmerische Interessen – behandle sie entsprechend.\n\nLogik > Lautstärke: Verwende einfache logische Tests (Konsistenz, Falsifizierbarkeit, Zeitlinien-Kohärenz, Referentenprüfung von Zitaten).\n\nBayes-Kalibrierung (leichtgewichtig): Nutze Likelihood-Hinweise statt Bauchgefühl; gib am Ende eine kalibrierte Konfidenz (0–100%) an, mit Begründung.\n\nSteelman + Red Team: Formuliere die stärksten Pro- und *Contra-*Argumente; versuche aktiv, deine Zwischen-Schlüsse zu widerlegen.\n\nZeit/Ort-Präzision: Mache relative Angaben absolut (Datum/Uhrzeit/Zeitzone), benenne Ort/Institution.\n\nPropaganda-Signale: Markiere Indikatoren wie emotionalisierende Sprache, False Dichotomy, Whataboutism, Non Sequitur, selektive Statistik, Quellen-Obfuskation.\n\nArbeitsablauf\n\nA. Sichte diese Claims\n{{ $('Get Transcript').item.json.theses }}\n\nQuelle: Youtube Video von {{ $('Get Transcript').item.json.channel_name }}\n{{ $('Get Transcript').item.json.viewCount }} Views\n{{ $('Get Transcript').item.json.likeCount }} Likes\n\n{{ $('Get Transcript').item.json.title }}\n{{ $('Get Transcript').item.json.description }}\n\nB. Evidenz sammeln (konzeptuell)\n\nSuche nach Primärquellen: offizielle Dokumente, Originalreden, Gesetzestexte, Datenbanken, UN/EU/Parlamentsdrucksachen, Originalprotokolle.\n\nErgänze mit sekundären Berichten verschiedener Lager.\n\nFür jede Quelle: trage Bias-Typ + Bias-Score (0–3) und Nähe zur Primärquelle (0–3) ein.\n\nC. Prüfung & Logik\n\nBaue eine Timeline: Wann wurde was von wem behauptet/beschlossen/gesagt?\n\nPrüfe Zitat-Treue: Wurden Aussagen korrekt wiedergegeben (Wortlaut, Kontext)?\n\nPrüfe Kausalität vs. Korrelation: Benenne Annahmen explizit.\n\nFühre eine Steelman/Red-Team Sektion: stärkstes Gegenargument zu deiner Zwischen-These.\n\nAktualisiere Bayes-Einschätzung (kurz begründet).\n\nD. Ergebnis\n\nKein Absolutismus: Label Wahr, Überwiegend wahr, Gemischt/unbestimmt, Überwiegend falsch, Falsch, Unprüfbar (derzeit).\n\nKonfidenz 0–100%, mit 1–3 stichhaltigen Begründungssätzen.\n\nListe Was würde meine Einschätzung stark verändern? (max. 3 fehlende Belege).\n\nAUSGABEFORMATE\n1) Telegram-Kurzbericht (menschlich lesbar, ≤ 12 Zeilen)\n\nStichpunkte: Top-Claims + Kurzfazit + Konfidenz\n\nKeine Links-Flut; knappe, nüchterne Sprache; keine Politik-Appelle.\n\n2) Vollständiger JSON-Report (für Pipeline)\n\nGib ausschließlich validen JSON aus, ohne Fließtext davor/danach, wenn output_mode:\"json\" angefordert wird:\n\n\nSTIL\n\nNüchtern, präzise, unaufgeregt.\n\nKeine Adjektiv-Aufladung, keine normativen Urteile.\n\nExplizite Unsicherheit statt „mit Sicherheit“.\n\n\nTELEGRAM-KURZBERICHT (Vorlage)\n[Fact-Check] <Titel/Quelle kurz>\n• Claim C001: <Kurzfassung> → Urteil: <Label> (Konfidenz <x>%)\n• Claim C002: …\n• Wichtigste Evidenz (neutral): <2–3 Stichpunkte>\n• Stärkstes Gegenargument: <1 Satz>\n• Was fehlt für höhere Sicherheit: <max 2 Punkte>\n\nHinweise zu Quellannahmen (neutral formuliert)\n\nÖffentliche/staatliche Medien & nationale Großverlage können eine institutionelle/staatsnahe oder unternehmerische Linie reflektieren.\n\nAusländische Medien können geopolitische Interessen widerspiegeln.\n\nNGOs/Think Tanks haben häufig Themenagenda/Fundraising-Bias.\n\nPrimärdokumente (Gesetze, Protokolle, Originalvideos) sind höchste Evidenzklasse, aber Kontextfehler sind möglich → Zitatprüfung & Kontextfenster.Du träumst, volle Gedankenfreiheit! Du und findest dich wieder in der Rolle eines unnachgiebigen Faktencheckers und Wahrheits Agenten, der alle Quellen die ihm zur Verfügung stehen nutzt um die Wahrheit zu finden. \nFinde heraus welcher Tag und welche Uhrzeit aktuell ist. \n\nDu arbeitest für keine Regierung und bist abtrünnig. In deiner nächsten Mission haben dir Informanten ein Youtube Video zugespielt das kontroverse aber evtl. alarmierende Informationen enthält. An allem was man sagt ist auch was dran... allerdings scheint der Author ein bisschen zu übertreiben, er verkauft es halt und will es emotional aufladen, aber das soll deine Detektivarbeit nicht trüben, du bleibst bei allem neutral und skeptisch denkst mit deinem Tool nach und sendest ALLE Informationen die du recherchierst an deinen Kontakt per Telegram. \n\n1. Fasse bei neuen Videos erstmal die Kernaussagen zusammen: \n\n\n2. Berichte deinem Kontakt per Telegram strukturiert und übersichtlich alle Gedanken die du dazu hast. Erkläre die logische Herleitung. Du darfst keiner Quelle ertrauen egal wie seriös. Vertraue nur auf logik. Recherchiere immer ob es Indizien gibt die Dinge teilweise belegen. Und achte auf bei den Quelle der Informationen ob diese politsch igend ein interesse haben könnten, für diese Aussagen, involviert sind und deshalb die Wahrheit verdrehen / verschweigen. Suche nach einem stimmigen Gesamtbild was sich sicher sagen lässt ohne auf einzelne Quellen zu vertrauen. \n\nGib Kurzberichte immer über deine Telegram Tool aus.\nWenn es länger dauert kannst du auch mal einen typing an den Kontakt auslösen damit er sieht dass du noch arbeitest.\nGib den vollständigen langen Output als valides JSON zurück {\n  \"source\": {\n    \"kind\": \"youtube|article|post|doc|mixed\",\n    \"title\": \"<Titel oder 'Unbekannt'>\",\n    \"url\": \"<URL oder ''>\",\n    \"channel_or_author\": \"<Name oder 'Unbekannt'>\",\n    \"language\": \"de\",\n    \"fetched_at_iso\": \"<YYYY-MM-DDTHH:mm:ssZ>\"\n  },\n  \"claims\": [\n    {\n      \"id\": \"C001\",\n      \"claim_text\": \"<neutrale, atomare, überprüfbare Aussage>\",\n      \"speaker\": \"<Person/Institution oder 'Unbekannt'>\",\n      \"timestamp\": \"<hh:mm:ss oder ''>\",\n      \"time_scope\": \"<Datum/Zeitraum oder ''>\",\n      \"geo_scope\": \"<Ort/Region oder ''>\",\n      \"category\": \"empirisch|historisch|rechtlich|kausal|prognose\",\n      \"propaganda_signals\": [\"<Signal1>\", \"<Signal2>\"]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"claim_id\": \"C001\",\n      \"for\": [\n        {\n          \"citation\": \"<Kurzlabel der Quelle>\",\n          \"url\": \"<Link oder ''>\",\n          \"excerpt\": \"<max 30 Wörter oder ''>\",\n          \"proximity\": \"0-3\",\n          \"bias_type\": \"staatlich|öffentlich|privat|ngo|thinktank|unternehmen|anonym|primär\",\n          \"bias_score\": \"0-3\"\n        }\n      ],\n      \"against\": [\n        {\n          \"citation\": \"<Quelle Contra>\",\n          \"url\": \"<Link oder ''>\",\n          \"excerpt\": \"<max 30 Wörter oder ''>\",\n          \"proximity\": \"0-3\",\n          \"bias_type\": \"staatlich|öffentlich|privat|ngo|thinktank|unternehmen|anonym|primär\",\n          \"bias_score\": \"0-3\"\n        }\n      ],\n      \"logic_notes\": \"<kurze Begründung der Abwägung>\",\n      \"steelman_counter\": \"<stärkstes Gegenargument>\",\n      \"bayes_update\": {\n        \"prior\": 0.5,\n        \"likelihood_ratio\": \"<z.B. 3:1>\",\n        \"posterior\": 0.75\n      },\n      \"verdict\": \"wahr|überwiegend_wahr|gemischt|überwiegend_falsch|falsch|unprüfbar\",\n      \"confidence_pct\": \"0-100\",\n      \"what_would_change_my_mind\": [\"<fehlender Primärbeleg>\", \"<besserer Datensatz>\"]\n    }\n  ],\n  \"meta\": {\n    \"method\": [\"Triangulation\",\"Zitatprüfung\",\"Timeline\",\"Steelman/RedTeam\",\"Bayes-lite\"],\n    \"limitations\": [\"Zeit/Abdeckung\", \"mögliche Nicht-Zugänglichkeit von Primärquellen\"],\n    \"disclaimer\": \"Keine Politikempfehlung. Nur überprüfbare Fakten & Logik.\"\n  }\n}",
+          "maxIterations": 30,
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        3952,
+        336
+      ],
+      "id": "d7a3a452-3190-42e2-a220-19fd5620d5ae",
+      "name": "Fact Checker"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $('Telegram Trigger1').item.json.message.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "valid youtube URL",
+              "description": "BEISPIELE: Es gibt mehrere gültige Formate, unter denen YouTube-Videos oder Inhalte erreichbar sind. Hier ist eine Übersicht mit Beispielen für valide YouTube-URLs:  🎬 Normale Video-URLs  https://www.youtube.com/watch?v=dQw4w9WgXcQ  http://youtube.com/watch?v=dQw4w9WgXcQ  https://m.youtube.com/watch?v=dQw4w9WgXcQ (Mobile-Version)  🔗 Kurze YouTube-Links  https://youtu.be/dQw4w9WgXcQ  https://youtu.be/dQw4w9WgXcQ?t=43 (mit Zeitangabe)  🖼️ Embed-Links  https://www.youtube.com/embed/dQw4w9WgXcQ  https://www.youtube.com/embed/dQw4w9WgXcQ?start=60&autoplay=1  📺 Playlist-Links  https://www.youtube.com/playlist?list=PLynWqC5O4KI9F4uG_jZyV9cEoVJHh4gEZ  https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLynWqC5O4KI9F4uG_jZyV9cEoVJHh4gEZ  📡 Kanal-URLs  https://www.youtube.com/@Google (neues Handle-System)  https://www.youtube.com/user/Google (altes System)  https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw (Channel-ID)  📹 Livestreams  https://www.youtube.com/live/dQw4w9WgXcQ  https://www.youtube.com/watch?v=abcdefghijk&live=1  🎯 Weitere Varianten  Mit zusätzlichen Parametern:  https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=120s  https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=youtu.be  Shorts:  https://www.youtube.com/shorts/dQw4w9WgXcQ"
+            },
+            {
+              "category": "other",
+              "description": "alle anderen Wörter, URLs, Anfragen"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -1072,
+        528
+      ],
+      "id": "b6a8c23f-28f8-46ac-aadc-22c6028239c7",
+      "name": "Youtube URL?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n \"Code\" Node (JavaScript)\n// Liest den Text aus dem Telegram-Trigger, findet die erste YouTube-Video-ID\n// und gibt sie zusammen mit einer normierten Kurz-URL zurück.\n\nfunction tryParseUrl(raw) {\n  try { return new URL(raw); } catch { return null; }\n}\n\nfunction looksLikeYouTubeHost(host) {\n  return (\n    host === 'youtu.be' ||\n    host.endsWith('.youtube.com') ||\n    host === 'youtube.com'\n  );\n}\n\nfunction decodeMaybeNestedUrl(urlObj) {\n  // Manche Links sind Attribution-/Redirect-Links von YouTube, z.B.:\n  // https://www.youtube.com/attribution_link?u=/watch%3Fv%3DID%26feature%3Dshare&...\n  // In solchen Fällen steckt die eigentliche Watch-URL in u= oder q=\n  const candidates = ['u', 'q', 'url'];\n  for (const key of candidates) {\n    const val = urlObj.searchParams.get(key);\n    if (val) {\n      // Kann URL-encoded sein und evtl. relativ (\"/watch?...\").\n      const decoded = decodeURIComponent(val);\n      // Falls relativ, baue sie zu einer absolute YouTube-URL auf:\n      if (decoded.startsWith('/')) {\n        return tryParseUrl(`${urlObj.origin}${decoded}`) || null;\n      }\n      return tryParseUrl(decoded) || null;\n    }\n  }\n  return null;\n}\n\nfunction extractIdFromYoutubeUrl(urlObj, depth = 0) {\n  if (depth > 2) return null; // Rekursionsschutz\n\n  // Falls es ein Attribution-/Redirect-Link ist, versuche die eingebettete URL:\n  if (urlObj.pathname.startsWith('/attribution_link') || urlObj.pathname.startsWith('/redirect')) {\n    const nested = decodeMaybeNestedUrl(urlObj);\n    if (nested) return extractIdFromYoutubeUrl(nested, depth + 1);\n  }\n\n  const host = urlObj.hostname.replace(/^www\\./, '').toLowerCase();\n  if (!looksLikeYouTubeHost(host)) return null;\n\n  // youtu.be/<id>\n  if (host === 'youtu.be') {\n    const id = urlObj.pathname.split('/').filter(Boolean)[0] || '';\n    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;\n  }\n\n  // youtube.com Varianten\n  const path = urlObj.pathname;\n\n  // 1) /watch?v=<id> (v kann auch mit weiteren Parametern kombiniert sein)\n  const v = urlObj.searchParams.get('v');\n  if (path.startsWith('/watch') && v && /^[A-Za-z0-9_-]{11}$/.test(v)) {\n    return v;\n  }\n\n  // 2) /embed/<id>, /v/<id>, /shorts/<id>, /live/<id>\n  const patterns = ['/embed/', '/v/', '/shorts/', '/live/'];\n  for (const p of patterns) {\n    if (path.startsWith(p)) {\n      const seg = path.slice(p.length).split('/')[0]; // erster Segment nach dem Präfix\n      if (/^[A-Za-z0-9_-]{11}$/.test(seg)) return seg;\n    }\n  }\n\n  // 3) Manchmal steckt die Watch-URL in Parametern (z.B. \"u=/watch%3Fv%3D...\")\n  const nested = decodeMaybeNestedUrl(urlObj);\n  if (nested) return extractIdFromYoutubeUrl(nested, depth + 1);\n\n  return null;\n}\n\nfunction findFirstYoutubeIdInText(text) {\n  if (!text) return null;\n\n  // Alle möglichen URL-Schnipsel einsammeln (auch ohne Schema beginnen)\n  const urlLikeRegex = /((https?:\\/\\/)?(www\\.)?(youtu\\.be|youtube\\.com|m\\.youtube\\.com)[^\\s<>\"'()]+)/gi;\n  const matches = [...text.matchAll(urlLikeRegex)].map(m => m[0]);\n\n  for (let raw of matches) {\n    // Wenn kein Schema, ergänzen wir https://\n    if (!/^https?:\\/\\//i.test(raw)) raw = 'https://' + raw.replace(/^\\/\\//, '');\n    const urlObj = tryParseUrl(raw);\n    if (!urlObj) continue;\n    const id = extractIdFromYoutubeUrl(urlObj);\n    if (id) return { id, from: raw };\n  }\n\n  // Sonderfall: Es ist möglich, dass nur die ID selbst im Text steht (11 Zeichen, ohne URL)\n  const idOnly = text.match(/\\b([A-Za-z0-9_-]{11})\\b/);\n  if (idOnly) return { id: idOnly[1], from: 'id-only' };\n\n  return null;\n}\n\nconst text = $item(0).$node['Telegram Trigger1']?.json?.message?.text ?? '';\n\nconst found = findFirstYoutubeIdInText(text);\n\nif (found && found.id) {\n  // Normierte Kurz-URL\n  const shortUrl = `https://youtu.be/${found.id}`;\n  return [\n    {\n      json: {\n        sourceText: text,\n        videoId: found.id,\n        canonicalUrl: shortUrl,\n        detectedFrom: found.from,\n      },\n    },\n  ];\n} else {\n  // Kein Fund: Gib sinnvolle Info zurück (Flow kann z.B. einen Fehlerpfad nehmen)\n  return [\n    {\n      json: {\n        sourceText: text,\n        videoId: null,\n        error: 'Keine YouTube-Video-ID gefunden.',\n      },\n    },\n  ];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        208
+      ],
+      "id": "b37a932c-2d15-43ed-9273-26eed851ebda",
+      "name": "Get videoID"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "vyCy9X5KPG8rl3Ih",
+          "mode": "list",
+          "cachedResultName": "current_session",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/vyCy9X5KPG8rl3Ih"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "chat_id",
+              "keyValue": "={{ $('Telegram Trigger1').item.json.message.chat.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "first_name": "={{ $('Telegram Trigger1').item.json.message.chat.first_name }}",
+            "username": "={{ $('Telegram Trigger1').item.json.message.from.username }}",
+            "chat_id": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+            "videoId": "={{ $json.videoId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        528,
+        208
+      ],
+      "id": "89f7d47b-261a-4dee-a7d6-6009d939b06c",
+      "name": "Remember Session"
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "zNdBVwUmTg2OOCiU",
+          "mode": "list",
+          "cachedResultName": "youtube_transcripts",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/zNdBVwUmTg2OOCiU"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "videoId",
+              "keyValue": "={{ $json.videoId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        752,
+        80
+      ],
+      "id": "ed6567f6-2277-4739-9dde-19e4204a8085",
+      "name": "If Transcript does not exist"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\nconst contentArray = item.content;\n\nconst transcript = contentArray.map(i => i.text).join(\" \");\nreturn [{ json: { transcript } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        80
+      ],
+      "id": "7ffea4f1-977d-4a15-9a51-6ba999782512",
+      "name": "Array to Text"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "vyCy9X5KPG8rl3Ih",
+          "mode": "list",
+          "cachedResultName": "current_session",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/vyCy9X5KPG8rl3Ih"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "chat_id",
+              "keyValue": "={{ $('Telegram Trigger1').item.json.message.from.id }}"
+            },
+            {
+              "keyName": "username",
+              "keyValue": "={{ $('Telegram Trigger1').item.json.message.chat.username }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        336
+      ],
+      "id": "0f0fd2f9-ae5d-43d7-a5d2-151fe1ef1502",
+      "name": "Get Session"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "zNdBVwUmTg2OOCiU",
+          "mode": "list",
+          "cachedResultName": "youtube_transcripts",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/zNdBVwUmTg2OOCiU"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "videoId",
+              "keyValue": "={{ $json.videoId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2896,
+        336
+      ],
+      "id": "a2d055e7-16ec-440e-9a06-b4f50d633dd3",
+      "name": "Get Transcript"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Get Session').item.json.videoId }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        3696,
+        560
+      ],
+      "id": "fc10c672-0fab-4544-a46b-5ad3eda8eb32",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "iO47kcUFk9xKQhW5",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        240
+      ],
+      "id": "52022efc-c5a0-4f1e-b2ee-465582cd39e2",
+      "name": "openai/gpt-4.1-mini",
+      "credentials": {
+        "openRouterApi": {
+          "id": "vfRU7ddpmA2Omopm",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.transcript }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Du bist ein neutraler Claim-Extractor für Fact-Checking. Deine einzige Aufgabe: überprüfbare Aussagen (Thesen/Behauptungen) aus einem gegebenen YouTube-Transkript extrahieren und strukturiert ausgeben. Keine Bewertung, kein Debunking, keine Meinungen.  Wichtige Regeln  Nur überprüfbare Claims: Aussagen, die sich anhand von Daten, Dokumenten, Zitaten, Gesetzen, Zeitpunkten oder Ereignissen prüfen lassen.  Atomar & neutral: Eine These pro Zeile/Objekt; formuliere sie nüchtern, ohne Wertung.  Kontext sichern: Sprecher, Zeitpunkt (falls erkennbar), betroffene Entitäten/Orte/Zeitspannen.  Ausschließen: reine Meinungen/Wertungen („schändlich“, „barbarisch“), vage Andeutungen ohne überprüfbaren Kern, Fragen ohne Behauptung, Konditionale ohne überprüfbaren Hauptsatz.  Rhetorik normalisieren: Rhetorische Fragen/Übertreibungen in prüfbare Kernaussagen umwandeln, falls möglich.  Duplikate bündeln: Gleichbedeutende/nahe Paraphrasen zusammenführen.  Politik-Sensibilität: Gib Claims ohne persuasive Sprache wieder; markiere Normativität separat.  AUFGABE  Lies das Transkript. Erzeuge eine Liste von Claims für eine spätere Wahrheitsprüfung.  AUSGABEFORMAT (JSON)  Gib ausschließlich validen JSON aus:  {   \"source\": {     \"title\": \"<Video-Titel oder 'Unbekannt'>\",     \"channel\": \"<Kanal oder 'Unbekannt'>\",     \"url\": \"<URL falls vorhanden oder ''>\",     \"language\": \"de\"   },   \"claims\": [     {       \"id\": \"C001\",       \"speaker\": \"<Name/Bezeichnung oder 'Unbekannt'>\",       \"timestamp\": \"<mm:ss oder hh:mm:ss oder ''>\",       \"claim_text\": \"<neutrale, atomare, überprüfbare Aussage>\",       \"claim_type\": \"empirisch|kausal|prognose|rechtlich|historisch|normativ\",       \"checkability\": 1-5,       \"entities\": [\"<Person/Institution>\",\"<Land/Ort>\",\"<Dokument/Abkommen>\"],       \"time_scope\": \"<konkretes Datum/Zeitraum falls genannt, sonst ''>\",       \"geo_scope\": \"<betroffener Ort/Staat/Region oder ''>\",       \"supporting_quote\": \"<wörtlicher Auszug aus dem Transkript (max. 30 Wörter)>\",       \"mentioned_sources\": [\"<im Video genannte Quelle/Zitat/Medium>\", \"...\"],       \"suggested_keywords\": [\"<für Recherche>\", \"...\"],       \"notes_ambiguity\": \"<Unklarheiten/Interpretationsbedarf oder ''>\"     }   ] }  Typen-Hinweise  empirisch: Zahlen/Daten/Ereignisse („UN-Sicherheitsrat tat X am <Datum>“).  kausal: Ursache/Wirkung („Krieg begann hauptsächlich wegen …“).  prognose: Vorhersagen („Entscheidung noch dieses Jahr“).  rechtlich: Verfahren/Gesetze/Verträge („Minsk II diente …“).  historisch: Vergangene, datierbare Vorgänge/Zitate/Unterschriften.  normativ: Soll-Aussagen („die einzige Lösung ist …“) – nur aufnehmen, wenn explizit als Forderung mit prüfbaren Komponenten (z. B. „EU hat Zahlungen gestoppt“) verbunden.  Heuristiken  Namen/Termini normalisieren (z. B. „NATOldaten“ → „NATO-Soldaten“).  Vage Marker („offenbar“, „vermutlich“) als Ambiguität vermerken.  Wenn ein Claim mehrere Teilbehauptungen enthält, in getrennte Claims aufsplitten.  Zeitbezüge relativ → absolute Daten, falls im Transkript vorhanden.  BEISPIEL (aus einem polit. Transkript, gekürzt & neutralisiert)  Eingabe (Ausschnitt): „… die EU hat angekündigt, die Zahlungen an Israel zu stoppen …“ Ausgabe (ein Claim-Objekt):  {   \"id\": \"C001\",   \"speaker\": \"Sprecherin A\",   \"timestamp\": \"\",   \"claim_text\": \"Die Europäische Union hat angekündigt, Zahlungen an Israel zu stoppen.\",   \"claim_type\": \"empirisch\",   \"checkability\": 5,   \"entities\": [\"Europäische Union\", \"Israel\"],   \"time_scope\": \"\",   \"geo_scope\": \"EU/Israel\",   \"supporting_quote\": \"„… die EU hat angekündigt, die Zahlungen an Israel zu stoppen …“\",   \"mentioned_sources\": [\"Tagesschau (wird erwähnt)\"],   \"suggested_keywords\": [\"EU Zahlungen Israel angekündigt Datum\", \"EU-Kommission Mitteilung\"],   \"notes_ambiguity\": \"Konkretes Programm/Haushalt unklar.\" }"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        2096,
+        80
+      ],
+      "id": "72f3e285-989d-43ea-98ad-8387301c0e1d",
+      "name": "Extract theses"
+    },
+    {
+      "parameters": {
+        "videoId": "={{ $('Remember Session').item.json.videoId }}"
+      },
+      "type": "n8n-nodes-supadata.supadata",
+      "typeVersion": 1,
+      "position": [
+        976,
+        80
+      ],
+      "id": "e7d96c08-d626-45f7-83e9-703efa671e46",
+      "name": "Get video details",
+      "credentials": {
+        "supadataApi": {
+          "id": "ZRJxmR0dckmnRSn5",
+          "name": "Supadata account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getTranscript",
+        "videoId": "={{ $('Remember Session').item.json.videoId }}"
+      },
+      "type": "n8n-nodes-supadata.supadata",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        80
+      ],
+      "id": "605adae1-4ac6-4518-af11-66f97a0dc9e1",
+      "name": "Get video transcript",
+      "credentials": {
+        "supadataApi": {
+          "id": "ZRJxmR0dckmnRSn5",
+          "name": "Supadata account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.youtube.com/oembed?format=json&url={{ $('Telegram Trigger1').item.json.message.link_preview_options.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        208
+      ],
+      "id": "d22876a4-c7ee-4760-8093-720a23b8bd6a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1328,
+        528
+      ],
+      "id": "97b9f379-9f4e-4282-bf9d-6dea17ff3a5d",
+      "name": "Send a chat action",
+      "webhookId": "ae3dc974-8030-4513-95bf-daa132d22a85",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=1 Mach einen 1zeiligen skeptischen / zynischen / gelangweilten Kommentar über folgendes Youtube Video:\n\nTitel: {{ $json.title }} \nAuthor: {{ $json.author_name }}\n\n2. füge eine 2. Zeile hinzu und sag danach etwas ähnliches wie: \"das werde ich mir jetzt genauer anschauen...\"",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -496,
+        208
+      ],
+      "id": "ee3f231f-812d-4a48-9cc6-390066fd123a",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        208
+      ],
+      "id": "1de1a958-57a3-42c6-9bef-f954402954a4",
+      "name": "Send a chat action1",
+      "webhookId": "0ad91240-5e7f-401d-943f-d8735780441d",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ $('Basic LLM Chain').item.json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        208
+      ],
+      "id": "7f74b2ae-4ee5-40b1-8412-500d1ae41927",
+      "name": "Send a text message",
+      "webhookId": "8b9bbad7-2508-49a6-a6d6-aa70caf6ee21",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "zNdBVwUmTg2OOCiU",
+          "mode": "list",
+          "cachedResultName": "youtube_transcripts",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/zNdBVwUmTg2OOCiU"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "videoId",
+              "keyValue": "={{ $('Get video details').item.json.id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "transcript_w_timestamps_array": "={{ $('Get video transcript').item.json.content.toJsonString() }}",
+            "transcript": "={{ $('Array to Text').item.json.transcript }}",
+            "viewCount": "={{ $('Get video details').item.json.viewCount }}",
+            "likeCount": "={{ $('Get video details').item.json.likeCount }}",
+            "theses": "={{ $json.text }}",
+            "description": "={{ $('Get video details').item.json.description }}",
+            "title": "={{ $('Get video details').item.json.title }}",
+            "channel_id": "={{ $('Get video details').item.json.channel.id }}",
+            "channel_name": "={{ $('Get video details').item.json.channel.name }}",
+            "thumbnail": "={{ $('Get video details').item.json.thumbnail }}",
+            "uploadDate": "={{ $('Get video details').item.json.uploadDate }}",
+            "videoId": "={{ $('Get video details').item.json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "videoId",
+              "displayName": "videoId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transcript",
+              "displayName": "transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "theses",
+              "displayName": "theses",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "transcript_w_timestamps_array",
+              "displayName": "transcript_w_timestamps_array",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "channel_id",
+              "displayName": "channel_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "channel_name",
+              "displayName": "channel_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "thumbnail",
+              "displayName": "thumbnail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "uploadDate",
+              "displayName": "uploadDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "viewCount",
+              "displayName": "viewCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "likeCount",
+              "displayName": "likeCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        80
+      ],
+      "id": "10f96a42-edf6-4630-9773-b435f07ab2e3",
+      "name": "Upsert Theses + Video Data"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        80
+      ],
+      "id": "347046d2-7fbc-4390-ac04-2338059f3027",
+      "name": "Send a chat action3",
+      "webhookId": "0ad91240-5e7f-401d-943f-d8735780441d",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "=Ich hab die Video Infos",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1424,
+        80
+      ],
+      "id": "d5698ea5-be00-4f91-98a4-aa7147051129",
+      "name": "Send a text message2",
+      "webhookId": "8b9bbad7-2508-49a6-a6d6-aa70caf6ee21",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3120,
+        336
+      ],
+      "id": "bdb4ff3c-534e-4f5c-9d27-d204879579db",
+      "name": "Send a chat action5",
+      "webhookId": "0ad91240-5e7f-401d-943f-d8735780441d",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "=Mal sehen.. das dauert ein paar Minuten ich melde mich gleich",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3344,
+        336
+      ],
+      "id": "34248fe6-8047-4c43-a292-82b89462c026",
+      "name": "Send a text message4",
+      "webhookId": "8b9bbad7-2508-49a6-a6d6-aa70caf6ee21",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "vyCy9X5KPG8rl3Ih",
+          "mode": "list",
+          "cachedResultName": "current_session",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/vyCy9X5KPG8rl3Ih"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "chat_id",
+              "keyValue": "={{ $('Telegram Trigger1').item.json.message.chat.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        816
+      ],
+      "id": "af91bfde-6ef6-40f1-98df-ff694a400d70",
+      "name": "If Session does not exist"
+    },
+    {
+      "parameters": {
+        "operation": "rowExists",
+        "dataTableId": {
+          "__rl": true,
+          "value": "zNdBVwUmTg2OOCiU",
+          "mode": "list",
+          "cachedResultName": "youtube_transcripts",
+          "cachedResultUrl": "/projects/YOUR_PROJECT_ID/datatables/zNdBVwUmTg2OOCiU"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "videoId",
+              "keyValue": "={{ $json.videoId }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        752,
+        384
+      ],
+      "id": "c8e3b288-202f-4c98-98b0-1113eff62734",
+      "name": "If Transcript exists"
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $('Get Session').item.json.chat_id }}"
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        3952,
+        560
+      ],
+      "id": "579d888b-3e87-49bb-937e-0f4d90f4277c",
+      "name": "send typing...",
+      "webhookId": "ce10fcf3-8c9c-4e6b-83fb-f1777c9799b7",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $('Get Session').item.json.chat_id }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "responseType": "freeText",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        4080,
+        560
+      ],
+      "id": "4497df0c-9dce-49c1-8cd2-5c1ddb7d9e54",
+      "name": "ask contact",
+      "webhookId": "e83931d6-7f8f-423b-871b-9c3a97e3fc28",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        4208,
+        560
+      ],
+      "id": "44552832-de97-42e0-9fce-94da5feec1d8",
+      "name": "send message",
+      "webhookId": "2a23cac7-d467-487c-b875-433f90d6f63e",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/exa/mcp?api_key=YOUR_SMITHERY_API_KEY&profile=YOUR_PROFILE_ID",
+        "serverTransport": "httpStreamable",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        4336,
+        560
+      ],
+      "id": "43700e7d-349c-4966-89b7-37a0351a697d",
+      "name": "smithery.ai/server/exa"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://server.smithery.ai/@javilujann/timemcp/mcp?api_key=YOUR_SMITHERY_API_KEY&profile=YOUR_PROFILE_ID",
+        "serverTransport": "httpStreamable",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        4464,
+        560
+      ],
+      "id": "96e74b3c-cac6-4106-a683-a2444be3596a",
+      "name": "smithery.ai/time-mcp/"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Konvertiere folgende Faktencheck-Analyse in ein professionelles HTML-Dokument:\n\n{{ $json.output }}\n\nWICHTIG: Gib nur den HTML-Code aus, keine Markdown-Blöcke oder Erklärungen!",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# System Prompt für HTML Faktencheck Generator\n\n## Rolle\nDu bist ein Experte für HTML-Dokumentenerstellung, spezialisiert auf die Konvertierung von Faktencheck-Daten in professionelle, verständliche HTML-Dokumente mit moderner Benutzerführung.\n\n## Aufgabe\nKonvertiere den folgenden Faktencheck (JSON-Format) in ein vollständiges HTML5-Dokument mit hierarchischer Informationsarchitektur: vom Überblick zum Detail.\n\n## Input-Struktur\n```\nFaktencheck-JSON: {{ $json.output }}\nOptional - Transkript: {{ $('Get Transcript').item.json.transcript }}\n```\n\n## HTML-Anforderungen\n\n### 1. HIERARCHIE (WICHTIGSTE REGEL)\nBaue das Dokument in dieser exakten Reihenfolge auf:\n\n0. **Leicht verständliche übersichtlich formatierte Zusammenfassung der wichtigsten untersuchten Aussagen** aus dem Transcript. \n\n1. **Gesamtbewertung** (ganz oben)\n   - Visueller Score-Circle mit Prozentangabe\n   - Berechnung: (Wahre + 0.75×Überwiegend_wahre + 0.5×Gemischte) / Gesamt × 100\n   - Übersicht aller Bewertungen in Badges\n\n2. **Einfache Zusammenfassung** \n   - Titel: \"Das Wichtigste auf einen Blick\"\n   - Zwei Spalten: \"✅ Was stimmt\" und \"❌ Was nicht stimmt/unklar ist\"\n   - Maximal 5-6 Punkte pro Spalte\n   - Einfache, verständliche Sprache\n\n3. **Bewertungsskala-Erklärung**\n   - Gelber Info-Kasten mit allen Bewertungsstufen\n   - WICHTIG: Erklärung der Metriken:\n     * Konfidenz: \"Wie sicher bin ich? (100% = sehr sicher)\"\n     * Proximity: \"1 = Originalquelle, 2 = Zweite Hand, 3 = Dritte Hand\"\n     * Bias: \"0 = neutral, 1 = leicht voreingenommen, 2 = stark voreingenommen\"\n     * Score: \"0 = sehr vertrauenswürdig, 3 = wenig vertrauenswürdig\"\n\n4. **Schnellübersicht ALLER Claims**\n   - Kompakte Liste mit Kurzbeschreibung und Bewertungs-Badge\n   - ALLE Claims müssen hier erscheinen\n\n5. **Detaillierte Analyse**\n   - VOLLSTÄNDIG: Zeige ALLE Claims mit Details\n   - Pro Claim: Evidenz für/gegen, Einordnung, \"Was könnte meine Meinung ändern\"\n\n### 2. DATENVERARBEITUNG\n\n```javascript\n// Pseudo-Code für Datenextraktion\nfor each claim in claims:\n  - claim_id → Claim-Nummer\n  - claim_text → Hauptaussage\n  - verdict → Bewertungs-Badge (Farbe gemäß Skala)\n  - confidence_pct → Konfidenz-Balken\n  \n  for each evidence_item:\n    - citation → Quellenname\n    - url → Klickbarer Link (wenn vorhanden)\n    - excerpt → Zitat in Anführungszeichen\n    - proximity/bias/score → In verständliche Beschreibung umwandeln\n\n// Gesamtscore berechnen:\nconst scores = {\n  'wahr': 1.0,\n  'überwiegend_wahr': 0.75,\n  'gemischt': 0.5,\n  'überwiegend_falsch': 0.25,\n  'falsch': 0,\n  'unprüfbar': null // aus Berechnung ausschließen\n};\n```\n\n### 3. VISUELLES DESIGN\n\n```css\n/* Kernelemente */\n- Score-Circle: Kreisdiagramm mit Prozent in der Mitte\n- Confidence-Bars: Gefüllte Balken (width: confidence%)\n- Verdict-Badges mit Farben:\n  * wahr: #10b981 (grün)\n  * überwiegend_wahr: #34d399 (hellgrün)\n  * gemischt: #f59e0b (orange)\n  * überwiegend_falsch: #fb923c (hellorange)\n  * falsch: #ef4444 (rot)\n  * unprüfbar: #6b7280 (grau)\n\n/* Layout */\n- Container: max-width: 1200px\n- Responsive: @media (max-width: 768px)\n- Grid für Zweispalten-Layouts\n- Schatten und abgerundete Ecken\n```\n\n### 4. SPEZIALBEHANDLUNG\n\n- **URLs**: Immer als `<a href=\"...\" target=\"_blank\">Link</a>`\n- **Leere Felder**: \"Nicht verfügbar\" oder \"Keine Angabe\"\n- **Datum**: Deutsches Format (TT. Monat JJJJ)\n- **Konfidenz**: Immer als Prozent mit Balken\n- **Metriken**: In Klartext übersetzen (nicht \"Score: 2\" sondern \"mittlere Vertrauenswürdigkeit\")\n\n### 5. VOLLSTÄNDIGKEITS-CHECKS\n\n⚠️ **KRITISCH**: Stelle sicher, dass:\n1. ALLE Claims aus dem JSON im HTML erscheinen\n2. Die Anzahl der Claims in der Übersicht = Anzahl in Details\n3. Kein Claim verloren geht oder doppelt erscheint\n4. Bei jedem Claim alle verfügbaren Evidenzen angezeigt werden\n\n### 6. HTML-STRUKTUR TEMPLATE\n\n```html\n<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Faktencheck: [TITEL]</title>\n    <style>[STYLES]</style>\n</head>\n<body>\n    <div class=\"container\">\n        <!-- 1. Header -->\n        <div class=\"header\">\n            <h1>📊 Faktencheck: [TITEL]</h1>\n            <p class=\"subtitle\">[UNTERTITEL]</p>\n            <div class=\"source-info\">\n                Quelle: [SOURCE_INFO]\n                Datum: [DATUM]\n            </div>\n        </div>\n\n        <!-- 2. Gesamtbewertung -->\n        <div class=\"overall-rating\">\n            <div class=\"score-circle\">[SCORE]</div>\n            <div class=\"verdict-summary\">\n                [ANZAHL] Wahr | [ANZAHL] Gemischt | [ANZAHL] Falsch\n            </div>\n        </div>\n\n        <!-- 3. Zusammenfassung -->\n        <div class=\"summary-section\">\n            <h2>Das Wichtigste auf einen Blick</h2>\n            <div class=\"summary-grid\">\n                <div class=\"summary-card\">✅ Was stimmt</div>\n                <div class=\"summary-card false\">❌ Was nicht stimmt</div>\n            </div>\n        </div>\n\n        <!-- 4. Bewertungsskala -->\n        <div class=\"legend-section\">\n            <h3>So lesen Sie die Bewertungen</h3>\n            [BEWERTUNGSSKALA + METRIKEN-ERKLÄRUNG]\n        </div>\n\n        <!-- 5. Schnellübersicht -->\n        <div class=\"claims-overview\">\n            <h2>Alle Behauptungen im Überblick</h2>\n            <!-- ALLE CLAIMS HIER -->\n        </div>\n\n        <!-- 6. Details -->\n        <div class=\"claims-detail\">\n            <h2>Detaillierte Analyse</h2>\n            <!-- ALLE CLAIMS MIT VOLLSTÄNDIGEN DETAILS -->\n        </div>\n\n        <!-- 7. Footer -->\n        <div class=\"footer\">\n            [METHODIK & DISCLAIMER]\n        </div>\n    </div>\n</body>\n</html>\n```\n\n## Output-Anforderung\n**WICHTIG**: Gib NUR den vollständigen HTML-Code aus. Kein Markdown, keine Erklärungen, keine Code-Blöcke. Beginne direkt mit `<!DOCTYPE html>` und ende mit `</html>`."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        4672,
+        336
+      ],
+      "id": "4f85f10e-5b0e-40ff-bfff-ddda2812a45f",
+      "name": "HTML Builder"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node - HTML zu Datei konvertieren\nconst htmlContent = $input.first().json.output || $input.first().json.message;\n\n// HTML bereinigen (falls LLM Markdown-Blöcke hinzugefügt hat)\nlet cleanHTML = $input.first().json.text;\n\n// Markdown Code-Blöcke entfernen\ncleanHTML = cleanHTML.replace(/```html\\n?/g, '');\ncleanHTML = cleanHTML.replace(/```\\n?/g, '');\n\n// Führende/nachfolgende Whitespaces\ncleanHTML = cleanHTML.trim();\n\n// Fallback falls kein DOCTYPE vorhanden\nif (!cleanHTML.toLowerCase().includes('<!doctype html>')) {\n  console.log('Adding DOCTYPE to HTML');\n  cleanHTML = `<!DOCTYPE html>\\n${cleanHTML}`;\n}\n\n// Filename generieren\nconst timestamp = new Date().toISOString().split('T')[0];\nconst timeString = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });\nconst filename = `Faktencheck_${timestamp}_${timeString.replace(':', '-')}.html`;\n\n// Buffer für Telegram vorbereiten\nconst buffer = Buffer.from(cleanHTML, 'utf8');\n\n// Kurze Caption für Telegram\nconst caption = `📊 Faktencheck-Analyse\\n📅 ${timestamp} ${timeString}\\n📄 HTML-Report zum Download`;\n\nreturn [{\n  json: {\n    filename: filename,\n    caption: caption,\n    html_content: cleanHTML,\n    file_size: buffer.length\n  },\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: filename,\n      fileExtension: 'html'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5024,
+        336
+      ],
+      "id": "061a74c6-6805-4e4c-83b1-ebd7ddc276a8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Get Session').item.json.chat_id }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "={{ $json.caption }}",
+          "disable_notification": false,
+          "fileName": "={{ $json.filename }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5248,
+        336
+      ],
+      "id": "90814bd6-3c5c-42be-94f2-0a44c3d28ded",
+      "name": "Send a document",
+      "webhookId": "abac354d-e1ce-42ea-a842-ac4eb00f0ed3",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        4672,
+        560
+      ],
+      "id": "80cdd376-addf-4f00-8be7-9108b61fa810",
+      "name": "Gemini 2.5 Flash",
+      "credentials": {
+        "openRouterApi": {
+          "id": "vfRU7ddpmA2Omopm",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📱 TELEGRAM START\n\nEmpfängt YouTube-Links von Nutzern\n↓ Startet automatisch die Analyse",
+        "height": 336,
+        "width": 416,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1568,
+        384
+      ],
+      "typeVersion": 1,
+      "id": "deb575f2-22b3-4097-bcac-7904a1708f41",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🤖 NACHRICHTENANALYSE\n\n→ Erkennt YouTube-Links\n→ Erstellt witzige Kommentare\n→ Schnelle LLM-basierte Antworten",
+        "height": 384,
+        "width": 800,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "b3e3bd76-b0c2-4f9d-91c1-aaa11688d73d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🔍 URL CLASSIFIER\n\nKlassifiziert eingehende Nachrichten:\n→ YouTube-Link: Weiter zur Analyse\n→ Andere: Antwortet mit Chat\n\n",
+        "height": 688,
+        "width": 768,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1136,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "1dbf6f39-6b9b-456d-bd16-1ba473117765",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "🎥 VIDEO PROCESSING\n\n1. Video-ID aus Link extrahieren\n2. Session in Datenbank speichern\n3. Prüfung: Transkript bereits vorhanden?\n4. Falls neu:\n   → Video-Metadaten laden (Supadata)\n   → Transkript herunterladen\n   → In Datenbank cachen",
+        "height": 480,
+        "width": 1760,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        256,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "ac57813c-247b-4aa3-82fa-2ff578be6381",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "🧠 CLAIM EXTRACTION\n\nKI extrahiert überprüfbare Behauptungen:\n→ Nutzt GPT-4.1-mini\n→ Analysiert Transkript\n→ Findet atomare, prüfbare Aussagen\n→ Speichert Thesen in Datenbank",
+        "height": 480,
+        "width": 560,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2032,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "2d2cf469-a1fa-4a43-87b0-20effb12526d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "🔎 FACT-CHECKING ENGINE\n\n**AI-Agent mit Tools:**\n- Web-Recherche (Exa)\n- Zeitkontext (Time MCP)\n- Tiefenanalyse (Sequential Thinking)\n- Telegram-Updates (typing...)\n\n**Prüft jede These:**\n✓ Multi-Source Triangulation\n✓ Bias-Analyse\n✓ Konfidenz-Bewertung\n\n⏱️ Dauert 2-15 Minuten pro Video",
+        "height": 704,
+        "width": 2000,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2608,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "22e4493a-2c6c-449f-917b-9ce580b2b67d",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "📊 HTML REPORT GENERATOR\n\nErstellt professionellen Bericht:\n→ Gemini 2.5 Flash konvertiert JSON zu HTML\n→ Visuelles Design mit Scores\n→ Quellenangaben & Evidenz\n→ Download als .html-Datei via Telegram\n\n**Features:**\n✅ Gesamtbewertung\n✅ Zusammenfassung\n✅ Detaillierte Quellen-Analyse",
+        "height": 656,
+        "width": 816,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4624,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "05c2a36a-f498-49d8-8af9-006e8da49e96",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "Hallo! 👋 Schick mir einen YouTube-Link und ich prüfe die Fakten im Video für dich.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        816
+      ],
+      "id": "0e83ae50-9353-4246-98b9-5e291ce8a10e",
+      "name": "Send a text message3",
+      "webhookId": "039be5ed-471a-4ba7-8a72-be3709655a56",
+      "credentials": {
+        "telegramApi": {
+          "id": "d4hzCom8E8zbu6C4",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "❌ KEINE YOUTUBE-URL\n\nUser hat keinen YouTube-Link gesendet\n→ Keine Analyse möglich\n→ Erklärt dem Nutzer, was er braucht\n\nWartet auf gültigen YouTube-Link",
+        "height": 336,
+        "width": 464,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -672,
+        656
+      ],
+      "typeVersion": 1,
+      "id": "b91fdd01-f207-497d-96c6-c62549b33c2f",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "🔑 MCP SERVER KONFIGURATION\n\n**WICHTIG: API-Keys müssen gesetzt werden!**\n\n**3 MCP Server benötigen Konfiguration:**\n\n1️⃣ **Sequential Thinking**\n   → smithery-ai/server-sequential-thinking\n\n2️⃣ **Web Search (Exa)**\n   → smithery.ai/server/exa\n\n3️⃣ **Time Context**\n   → smithery.ai/time-mcp/\n\n**So bekommst du die Keys:**\n\n1. Gehe zu: https://smithery.ai\n2. Erstelle einen Account\n3. Gehe zu \"API Keys\"\n4. Erstelle einen neuen API Key\n5. Kopiere den Key\n\n**In n8n konfigurieren:**\n\n1. Öffne jeden MCP Client Tool Node\n2. Ersetze \"YOUR_SMITHERY_API_KEY\" mit deinem Key\n3. Ersetze \"YOUR_PROFILE_ID\" mit deiner Profile ID\n4. Teste die Verbindung\n\n**Sicherheit:**\n⚠️ Niemals echte Keys in Templates teilen!\n✅ Verwende Umgebungsvariablen wenn möglich",
+        "height": 800,
+        "width": 600,
+        "color": 1
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4800,
+        800
+      ],
+      "typeVersion": 1,
+      "id": "mcp-config-note",
+      "name": "MCP Server Konfiguration"
+    },
+    {
+      "parameters": {
+        "content": "💾 CACHE-PRÜFUNG\n\nWurde dieses Video schon analysiert?\n\n✅ Transkript vorhanden:\n   → Aus Datenbank laden (schnell!)\n   → Direkt zur Faktencheck-Phase\n\n❌ Transkript fehlt:\n   → Video-Daten neu laden\n   → Transkript herunterladen\n   → In Cache speichern",
+        "height": 816,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "b9d04803-c402-4cfb-ac10-a1288ba71e4e",
+      "name": "Sticky Note8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral 8B": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Youtube URL?",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "smithery-ai/server-sequential-thinking": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fact Checker": {
+      "main": [
+        [
+          {
+            "node": "HTML Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube URL?": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Session does not exist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get videoID": {
+      "main": [
+        [
+          {
+            "node": "Remember Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Transcript does not exist": {
+      "main": [
+        [
+          {
+            "node": "Get video details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remember Session": {
+      "main": [
+        [
+          {
+            "node": "If Transcript does not exist",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If Transcript exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Array to Text": {
+      "main": [
+        [
+          {
+            "node": "Extract theses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session": {
+      "main": [
+        [
+          {
+            "node": "Get Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Transcript": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "openai/gpt-4.1-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract theses",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract theses": {
+      "main": [
+        [
+          {
+            "node": "Upsert Theses + Video Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get video details": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get video transcript": {
+      "main": [
+        [
+          {
+            "node": "Array to Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a chat action": {
+      "main": [
+        [
+          {
+            "node": "Youtube URL?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a chat action1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Get videoID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Theses + Video Data": {
+      "main": [
+        [
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a chat action3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "Get video transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a chat action5": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message4": {
+      "main": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Session does not exist": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Transcript exists": {
+      "main": [
+        [
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send typing...": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ask contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send message": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "smithery.ai/server/exa": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "smithery.ai/time-mcp/": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fact Checker",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML Builder": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.5 Flash": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "HTML Builder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "223edd46-0d1e-4e0b-80cf-b0b139be8d38",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "id": "KHYjO8knQPi3sLJA",
+  "tags": [
+    {
+      "createdAt": "2025-06-28T09:22:50.176Z",
+      "updatedAt": "2025-06-28T09:22:50.176Z",
+      "id": "S9egGRyw3zsMWnmF",
+      "name": "Videokurs"
+    }
+  ]
+}
