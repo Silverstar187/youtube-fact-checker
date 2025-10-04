@@ -20,8 +20,6 @@ Ein intelligenter Faktenprüfungs-Bot, der YouTube-Videos automatisch analysiert
 
 ## 🏗️ Workflow-Architektur
 
-![n8n Workflow Diagram](https://github.com/Silverstar187/youtube-fact-checker/raw/master/workflow-diagram.png)
-
 ### Hauptkomponenten des Workflows:
 
 1. **🔍 FACT-CHECKING ENGINE** (Grüner Bereich)
