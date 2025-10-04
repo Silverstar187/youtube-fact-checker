@@ -88,6 +88,26 @@ MIT License - siehe [LICENSE](LICENSE) für Details.
 
 Wir freuen uns über Beiträge! Bitte erstelle ein Issue oder Pull Request.
 
+### ⚠️ Bekannte Limitationen & Verbesserungsbedarf
+
+**Dieser Bot arbeitet derzeit nicht optimal und hat politische Einschränkungen:**
+
+- **🌍 Geografische Beschränkungen**: Der Bot kann nicht per VPN aus anderen Ländern recherchieren, was zu einseitiger deutscher Propaganda führt
+- **🌐 Fehlende Multisprachlichkeit**: Nur deutsche Quellen werden berücksichtigt, internationale Perspektiven fehlen
+- **📊 Kein Graph-Support**: Zusammenhänge zwischen Claims und Quellen werden nicht visualisiert
+- **🔍 Begrenzte Quellenvielfalt**: Recherche ist auf deutschsprachige Medien beschränkt
+
+**Bitte melde diese Probleme als Issues:**
+- [Geografische Beschränkungen](https://github.com/Silverstar187/youtube-fact-checker/issues/new?title=Geografische%20Beschränkungen%20-%20VPN%20Support%20benötigt)
+- [Multisprachlichkeit](https://github.com/Silverstar187/youtube-fact-checker/issues/new?title=Multisprachlichkeit%20-%20Internationale%20Quellen%20benötigt)
+- [Graph-Support](https://github.com/Silverstar187/youtube-fact-checker/issues/new?title=Graph-Support%20-%20Claim-Verbindungen%20visualisieren)
+
+**Hilf mit bei der Verbesserung:**
+- Implementierung von VPN-Rotation
+- Integration internationaler Nachrichtenquellen
+- Graph-basierte Claim-Analyse
+- Multi-Language Fact-Checking
+
 ## ⚠️ Disclaimer
 
 Dieser Bot ist ein Tool zur Unterstützung der Faktenprüfung. Die Ergebnisse sind nicht als absolute Wahrheit zu verstehen und sollten immer kritisch hinterfragt werden.
