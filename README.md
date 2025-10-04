@@ -16,6 +16,31 @@ Ein intelligenter Faktenprüfungs-Bot, der YouTube-Videos automatisch analysiert
 - 💬 **Telegram-Integration** - Einfache Bedienung via Chat
 - 🗄️ **Intelligentes Caching** - Vermeidet doppelte Analysen
 
+## 🏗️ Workflow-Architektur
+
+![n8n Workflow Diagram](https://github.com/Silverstar187/youtube-fact-checker/raw/master/workflow-diagram.png)
+
+### Hauptkomponenten des Workflows:
+
+1. **🔍 FACT-CHECKING ENGINE** (Grüner Bereich)
+   - **AI-Agent mit Tools**: Web-Recherche (Exa), Zeitkontext (Time MCP), Tiefenanalyse (Sequential Thinking)
+   - **Multi-Source Triangulation**: Prüft jede These mit unabhängigen Quellen
+   - **Bias-Analyse & Konfidenz-Bewertung**: Wissenschaftliche Methoden
+   - **Dauer**: 2-15 Minuten pro Video
+
+2. **🔑 MCP SERVER KONFIGURATION** (Roter Hinweis)
+   - **3 MCP Server** benötigen API-Key Konfiguration
+   - **Sequential Thinking**: `smithery-ai/server-sequential-thinking`
+   - **Web Search (Exa)**: `smithery.ai/server/exa`
+   - **Time Context**: `smithery.ai/time-mcp`
+   - **Setup**: [Smithery.ai](https://smithery.ai) → API Keys → Konfiguration in n8n
+
+3. **📊 HTML REPORT GENERATOR** (Oranger Bereich)
+   - **Gemini 2.5 Flash**: Konvertiert JSON zu HTML
+   - **Visuelles Design**: Scores, Quellenangaben & Evidenz
+   - **Download**: .html-Datei via Telegram
+   - **Features**: Gesamtbewertung, Zusammenfassung, Detaillierte Quellen-Analyse
+
 ## 🚀 Quick Start
 
 1. **Repository klonen**
