@@ -1,5 +1,7 @@
 # YouTube Fact Checker Bot 🤖
 
+![YouTube Fact Checker Workflow](fact_checker_n8n.png)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![n8n](https://img.shields.io/badge/n8n-Workflow-blue)](https://n8n.io)
 [![Telegram](https://img.shields.io/badge/Telegram-Bot-2CA5E0)](https://telegram.org)
